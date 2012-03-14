@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_login_hostname">109.74.7.111</string>
+    <string name="default_server_port">80</string>
+    <string name="shared_preferences_filename">sharedPrefs.settings</string>
+    
+</resources>

@@ -6,6 +6,7 @@ import java.util.Properties;
 import org.apache.http.HttpConnection;
 
 import puj.loginhistory.events.LoginClickListener;
+import puj.loginhistory.helpers.SessionHelper;
 
 import android.app.Activity;
 import android.content.Context;
@@ -22,7 +23,7 @@ public class LoginHistoryActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		
 	}
 
 	@Override
@@ -32,12 +33,11 @@ public class LoginHistoryActivity extends Activity {
 		 * has never logged in 2. A user does not have a session active 3. A
 		 * user has logged in and has an active session
 		 */
-		SharedPreferences prefs = getApplicationContext().getSharedPreferences(
-				getApplicationContext().getString(
-						R.string.shared_preferences_filename),
-				Context.MODE_PRIVATE);
-		String currentSessionCookie = prefs.getString("sessionCookie", null);
-		boolean isReturningUser = prefs.getBoolean("isReturningUser", false);
+		
+		Context currentContext = getApplicationContext();
+		
+		String currentSessionCookie = SessionHelper.getCookie(currentContext);
+		boolean isReturningUser = SessionHelper.getSharedPrefsBoolean(currentContext, R.string.isReturningUser);
 
 		if (currentSessionCookie == null) {
 			setContentView(R.layout.login_area);
@@ -56,15 +56,7 @@ public class LoginHistoryActivity extends Activity {
 
 	@Override
 	public void onDestroy() {
-		// Remove the cookie if "remember me" is not checked...
-		SharedPreferences prefs = getApplicationContext().getSharedPreferences(
-				getApplicationContext().getString(
-						R.string.shared_preferences_filename),
-				Context.MODE_PRIVATE);
-
-		Editor prefsEditor = prefs.edit();
-		prefsEditor.remove("sessionCookie");
-		prefsEditor.commit();
+		SessionHelper.clearCookie(getApplicationContext());
 		super.onDestroy();
 	}
 
