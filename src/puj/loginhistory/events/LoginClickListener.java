@@ -10,6 +10,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -70,7 +71,7 @@ public class LoginClickListener implements android.view.View.OnClickListener{
 			 try {
 				 	MessageDigest md = MessageDigest.getInstance("SHA-512");
 				 	md.update(passwordAndSalt.getBytes("UTF-8"));
-				 	encodedPassword = new String(md.digest());
+				 	encodedPassword = new String(Hex.encodeHex(md.digest()));
 		        } catch (NoSuchAlgorithmException e) {
 		            Log.e("LoginHistory", e.getMessage());
 		        } catch (UnsupportedEncodingException e) {
