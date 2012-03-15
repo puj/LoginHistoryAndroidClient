@@ -3,5 +3,7 @@
     <string name="default_login_hostname">109.74.7.111</string>
     <string name="default_server_port">80</string>
     <string name="shared_preferences_filename">sharedPrefs.settings</string>
+    <string name="default_login_path">/login</string>
+    <string name="default_register_path">/register</string>
     
 </resources>
