@@ -8,5 +8,7 @@
     <string name="login">Login</string>
     <string name="register">Register</string>
     <string name="loginhistoryheader">Login History</string>
+    <string name="login_header">Login</string>
+    <string name="register_header">Register</string>
 
 </resources>

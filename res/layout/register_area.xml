@@ -3,6 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/txtRegisterHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/register_header"
+        android:textColor="@color/statusText"
+        android:textSize="30dp" />
 
     <LinearLayout
         android:id="@+id/layUsername"
@@ -63,6 +71,13 @@
             android:duplicateParentState="false"
             android:text="@string/register" />
 
+        <TextView
+            android:id="@+id/lblStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:textColor="@color/statusText" android:layout_alignBottom="@id/laySubmit"/>
+
         <ProgressBar
             android:id="@+id/pgrProgress"
             style="?android:attr/progressBarStyleLarge"
@@ -70,6 +85,7 @@
             android:layout_height="32dp"
             android:layout_centerInParent="false"
             android:layout_centerVertical="false" android:layout_alignParentBottom="true" android:visibility="invisible"/>
+
     </RelativeLayout>
 
 </LinearLayout>

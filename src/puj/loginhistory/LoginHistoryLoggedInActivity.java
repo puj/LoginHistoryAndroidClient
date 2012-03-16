@@ -78,71 +78,39 @@ public class LoginHistoryLoggedInActivity extends Activity {
 
 	protected class GetLoginsRequest extends
 			AsyncTask<Void, Boolean, JSONObject> {
-		@Override
-		protected void onPreExecute() {
-			ProgressBar progressBar = (ProgressBar) findViewById(R.id.pgrProgress);
-			progressBar.setVisibility(ProgressBar.VISIBLE);
-		}
-
-		@Override
-		protected void onPostExecute(JSONObject results) {
-			ProgressBar progressBar = (ProgressBar) findViewById(R.id.pgrProgress);
-			progressBar.setVisibility(ProgressBar.INVISIBLE);
-		}
-
+		
 		@Override
 		protected JSONObject doInBackground(Void... voids) {
-			publishProgress(true);
-
 			Context context = getApplicationContext();
 
+			// Build the path to get the logins
 			String url = "http://"
 					+ context.getString(R.string.default_login_hostname) + ":"
 					+ context.getString(R.string.default_server_port)
 					+ context.getString(R.string.default_get_logins_path);
 
-			// Create the JSON credentials
 			try {
-				JSONObject jsonObj = new JSONObject();
-				jsonObj.put("sessionCookie", SessionHelper.getCookie(context));
-
-				// Add your data
-				StringEntity entity = new StringEntity(jsonObj.toString(),
-						HTTP.UTF_8);
-				entity.setContentType("application/json");
-
+				// Get a new post object to the url with the current context cookie
+				HttpPost httppost = SessionHelper.getNewHttpPost(url,context);
+				
 				// Create a new HttpClient and Post Header
-				HttpClient httpclient = new DefaultHttpClient();
-				HttpPost httppost = new HttpPost(url);
-
-				Log.i("LoginHistory", "Trying to post to : " + url);
-
-				httppost.setHeader("Content-Type", "application/json");
-				httppost.setEntity(entity);
+				HttpClient httpClient = new DefaultHttpClient();
 
 				// Execute HTTP Post Request
-				HttpResponse response = httpclient.execute(httppost);
+				HttpResponse response = httpClient.execute(httppost);
 
 				// Parse the response
-				InputStream is = response.getEntity().getContent();
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(is, "iso-8859-1"), 8);
-				StringBuilder sb = new StringBuilder();
-				String line = null;
-				while ((line = reader.readLine()) != null) {
-					sb.append(line + "\n");
-				}
-				is.close();
-
-				Log.i("LogHistory", "Login list : " +sb.toString());
-
+				String stringResponse = SessionHelper.parseResponseContent(response);
 				
-				JSONObject results = new JSONObject(sb.toString());
+				Log.i("LogHistory", "Login list : " + stringResponse);
+				
+				// Convert the string response into a JSON object
+				//  This should be of the form {logins : [...]?}
+				JSONObject results = new JSONObject(stringResponse);
 				return results;
 				
 
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				Log.e("LoginHistory", e.getMessage());
 			}
 

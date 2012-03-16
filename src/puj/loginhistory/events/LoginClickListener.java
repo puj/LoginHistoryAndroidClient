@@ -28,6 +28,7 @@ import puj.loginhistory.LoginHistoryActivity;
 import puj.loginhistory.LoginHistoryLoggedInActivity;
 import puj.loginhistory.LoginHistoryRegisterActivity;
 import puj.loginhistory.R;
+import puj.loginhistory.helpers.SessionHelper;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -98,26 +99,12 @@ public class LoginClickListener implements android.view.View.OnClickListener {
 			View view = views[0];
 			publishProgress(true);
 			
-			
-			// Get the username
+			// Retrieve the encoded password 
 			final String username = mUsernameField.getText().toString();
+			final String password = mPasswordField.getText().toString();
+			String encodedPassword = SessionHelper.getPasswordHash(username,password);
 
-			// Setup the password encoding arguments
-			final String salt = "09234j234kj!@#213lk$#$)(*)DFSDFL##$";
-			final String passwordAndSalt = username
-					+ mPasswordField.getText().toString() + salt;
-
-			// Encode the password with base64 and salt
-			String encodedPassword = null;
-			try {
-				MessageDigest md = MessageDigest.getInstance("SHA-512");
-				md.update(passwordAndSalt.getBytes("UTF-8"));
-				encodedPassword = new String(Hex.encodeHex(md.digest()));
-			} catch (NoSuchAlgorithmException e) {
-				Log.e("LoginHistory", e.getMessage());
-			} catch (UnsupportedEncodingException e) {
-				Log.e("LoginHistory", e.getMessage());
-			}
+			
 
 			// Create the JSON credentials
 			try {
@@ -125,53 +112,37 @@ public class LoginClickListener implements android.view.View.OnClickListener {
 				jsonObj.put("username", username);
 				jsonObj.put("pwHash", encodedPassword);
 
-				// Add your data
-				StringEntity entity = new StringEntity(jsonObj.toString(),
-						HTTP.UTF_8);
-				entity.setContentType("application/json");
-
-				// Create a new HttpClient and Post Header
-				HttpClient httpclient = new DefaultHttpClient();
-				HttpPost httppost = new HttpPost(mUrl);
-
-				Log.i("LoginHistory", "Trying to post to : " + mUrl);
-
-				httppost.setHeader("Content-Type", "application/json");
-				httppost.setEntity(entity);
-
+				// Get the POST request object from the url and the JSON object 
+				HttpPost httppost = SessionHelper.getNewHttpPost(mUrl,jsonObj);
+				
 				// Execute HTTP Post Request
+				HttpClient httpclient = new DefaultHttpClient();
 				HttpResponse response = httpclient.execute(httppost);
 
-				// Parse the response
-				InputStream is = response.getEntity().getContent();
-				BufferedReader reader = new BufferedReader(new InputStreamReader(
-						is, "iso-8859-1"), 8);
-				StringBuilder sb = new StringBuilder();
-				String line = null;
-				while ((line = reader.readLine()) != null) {
-					sb.append(line + "\n");
-				}
-				is.close();
+				// Get the results of the POST Request
+				String resultString = SessionHelper.parseResponseContent(response);
 
+				Log.i("LogHistory", resultString);
 				
-
-				Log.i("LogHistory", sb.toString());
-				
-				JSONObject results = new JSONObject(sb.toString());
+				// Parse the results into JSON
+				JSONObject results = new JSONObject(resultString);
 				
 				// Store the session cookie, will only happen for logins, not register
 				if(results.optString("sessionCookie").compareTo("") != 0){
+					
+					// Get the share preferences for the application
 					SharedPreferences prefs = view.getContext().getSharedPreferences(
 						view.getContext().getString(
 								R.string.shared_preferences_filename),
 						Context.MODE_PRIVATE);
 				
-				
+					// Overwrite the session cookie in SharePreferences
 					Editor prefsEditor = prefs.edit();
 					prefsEditor.putString("sessionCookie", results.getString("sessionCookie"));
 					prefsEditor.commit();
 				}
 				
+				// Do the class-specific follow-up action
 				if(results.getString("result").compareTo("success") == 0){
 					actionSuccessful();
 				}else{
@@ -179,10 +150,12 @@ public class LoginClickListener implements android.view.View.OnClickListener {
 				}
 				
 			} catch (ClientProtocolException e) {
-				// TODO Auto-generated catch block
 				Log.e("LoginHistory", e.getMessage());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				// Find and change the label on the layout
+				TextView statusLabel = (TextView)mActivity.findViewById(R.id.lblStatus);
+				statusLabel.setText("Connection to server failed.  Do you have internet?");
+				
 				Log.e("LoginHistory", e.getMessage());
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
@@ -190,18 +163,27 @@ public class LoginClickListener implements android.view.View.OnClickListener {
 			}
 			
 			return null;
-			
 		}
 		
 	}
 	
+	/**
+	 * We have successfully logged in, we should navigate to our LoginHistory page
+	 */
 	protected void actionSuccessful(){
+		// Start the LoginHistory activity
 		Intent intent = new Intent(mActivity.getApplicationContext(), LoginHistoryLoggedInActivity.class);
 		mActivity.startActivity(intent);
+		
+		// Close down the login activity
 		mActivity.finish();
 	}
 	
+	/**
+	 * Logged was failed, show a message for the user to indicate this.
+	 */
 	protected void actionFailed(){
+		// Find and change the label on the layout
 		TextView statusLabel = (TextView)mActivity.findViewById(R.id.lblStatus);
 		statusLabel.setText("Login failed, please try again...");
 	}
