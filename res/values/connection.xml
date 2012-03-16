@@ -5,5 +5,6 @@
     <string name="shared_preferences_filename">sharedPrefs.settings</string>
     <string name="default_login_path">/login</string>
     <string name="default_register_path">/register</string>
+    <string name="default_get_logins_path">/getlogins</string>
     
 </resources>

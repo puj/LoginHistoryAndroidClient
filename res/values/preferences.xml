@@ -2,5 +2,6 @@
 <resources>
     <string name="sessionCookie">sessionCookie</string>
     <string name="isReturningUser">isReturningUser</string>
+    <color name="statusText">#FF0044FF</color>
     
 </resources>

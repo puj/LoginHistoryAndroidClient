@@ -39,7 +39,7 @@ public class LoginHistoryActivity extends Activity {
 		Context currentContext = getApplicationContext();
 		
 		String currentSessionCookie = SessionHelper.getCookie(currentContext);
-		boolean isReturningUser = SessionHelper.getSharedPrefsBoolean(currentContext, R.string.isReturningUser);
+
 
 		if (currentSessionCookie == null) {
 			setContentView(R.layout.login_area);
@@ -48,7 +48,7 @@ public class LoginHistoryActivity extends Activity {
 			Button submitButton = ((Button) findViewById(R.id.btnSubmit));
 			EditText usernameField = ((EditText) findViewById(R.id.txtUsername));
 			EditText passwordField = ((EditText) findViewById(R.id.txtPassword));
-			submitButton.setOnClickListener(new LoginClickListener(currentContext,
+			submitButton.setOnClickListener(new LoginClickListener(this,currentContext,
 					usernameField, passwordField));
 			
 			// Setup register button
@@ -60,7 +60,10 @@ public class LoginHistoryActivity extends Activity {
 				}
 			});
 		} else {
-			
+			// There is a zombie session here, if same credentials are used elsewhere
+			Intent intent = new Intent(getApplicationContext(), LoginHistoryLoggedInActivity.class);
+			startActivity(intent);
+			finish();
 		}
 
 		super.onStart();
